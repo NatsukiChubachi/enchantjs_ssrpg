@@ -58,6 +58,7 @@ var CSsrpgBattleField = function() {
                 this.createChip(i, j);
             }
         }
+        
         /*
         this._field = new Sprite(100, 100);
         {
@@ -82,6 +83,7 @@ var CSsrpgBattleField = function() {
         this._player.image = this._surf;
         this._scene.addChild( this._player );
         */
+       
     };
     
     return this;

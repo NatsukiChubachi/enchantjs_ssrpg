@@ -7,7 +7,8 @@ _gGame = null;
 window.onload = function(){
     
     // ゲームウィンドウのコア設定
-    var game = new Core(500, 250);              // 画面の横幅、縦幅
+    // var game = new Core(500, 250);              // 画面の横幅、縦幅
+    var game = new Core(500, 500);              // 画面の横幅、縦幅
     game.fps = 30;                              // フレーム数
     
     _gGame = game;                              // ゲームクラスの実体
@@ -83,9 +84,13 @@ window.onload = function(){
         var _newScene = new CHighAndLow();
         _newScene.initialize( game );
         */
-       
+        /*
         // SSRPG
         var _newScene = new CSsrpgTop();
+        _newScene.initialize( game );
+        */
+        // TCG
+        var _newScene = new CTcgTop();
         _newScene.initialize( game );
     };
     
