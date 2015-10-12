@@ -57,8 +57,8 @@ var CTcgBattleField = function() {
         // 毎ループ判定処理
         this._lblManager = this.createLabel( 0, 0, "!" );
         this._lblManager._parent = this;
-        this._lblManager.addEventListener("enterframe", function(){
-
+        this._lblManager.addEventListener("enterframe", function()
+        {
             switch( this._parent._iTurnState )
             {
             case _gTcgBattleField.TurnState.iBattleStart:
@@ -66,11 +66,10 @@ var CTcgBattleField = function() {
                 this._parent._iTurnState = _gTcgBattleField.TurnState.iRefreshState;
                 break;
             case _gTcgBattleField.TurnState.iRefreshState:
-                if ( this._parent._bStateMove )
+                // if ( this._parent._bStateMove )
                 {
                     alert("RefreshState");
                     this._parent._iTurnState = _gTcgBattleField.TurnState.iDrawState;
-                    this._parent._bStateMove = false;
                 }
                 break;
             case _gTcgBattleField.TurnState.iDrawState:
@@ -78,7 +77,6 @@ var CTcgBattleField = function() {
                 {
                     alert("DrawState");
                     this._parent._iTurnState = _gTcgBattleField.TurnState.iMainState;
-                    this._parent._bStateMove = false;
                 }
                 break;
             case _gTcgBattleField.TurnState.iMainState:
@@ -86,7 +84,6 @@ var CTcgBattleField = function() {
                 {
                     alert("MainState");
                     this._parent._iTurnState = _gTcgBattleField.TurnState.iBattleState;
-                    this._parent._bStateMove = false;
                 }
                 break;
             case _gTcgBattleField.TurnState.iBattleState:
@@ -94,15 +91,13 @@ var CTcgBattleField = function() {
                 {
                     alert("BattleState");
                     this._parent._iTurnState = _gTcgBattleField.TurnState.iEndState;
-                    this._parent._bStateMove = false;
                 }
                 break;
             case _gTcgBattleField.TurnState.iEndState:
-                if ( this._parent._bStateMove )
+                // if ( this._parent._bStateMove )
                 {
                     alert("EndState");
                     this._parent._iTurnState = _gTcgBattleField.TurnState.iRefreshState;
-                    this._parent._bStateMove = false;
                     
                     if ( this._parent._iOwnerState === _gTcgBattleField.OwnerNumber.iPlayerA )
                     {
@@ -116,12 +111,15 @@ var CTcgBattleField = function() {
                 break;
             };
             
+            // ステート移動フラグを戻す
+            this._parent._bStateMove = false;
         });
         
         // ターン状態表示ラベル
         this._lblTurnState = this.createLabel( 250, 450, "TurnState: " );
         this._lblTurnState._parent = this;
-        this._lblTurnState.addEventListener("enterframe", function() {
+        this._lblTurnState.addEventListener("enterframe", function() 
+        {
             var sTmp = "TurnState: ";
             
             switch( this._parent._iOwnerState )
@@ -162,63 +160,183 @@ var CTcgBattleField = function() {
         // テンポラリ変数
         var tmp;
         
-        // Player_A 手札
-        this.createChip( 100, 370 );
-        this.createChip( 150, 370 );
-        this.createChip( 200, 370 );
-        this.createChip( 250, 370 );
-        tmp = this.createChip( 300, 370 );
-        tmp._parent = this;
-        tmp.addEventListener("touchstart", function() {
-          // alert("AAA");
-          this.y += 1;
-          this._parent._bStateMove = true;
-        });
+        this.funcTouchStart = function()
+        {
+            // チップの移動
+            // this.y += 1;
+            
+            // ステート変化
+            this._parent._bStateMove = true;
+            
+            // スプライトの削除
+            // this.parentNode.removeChild( this );
+        };
         
+        this.funcTouchChip = function()
+        {
+            if ( this._bSelected === true )
+            {
+                this._bSelected = false;
+                this.scale( 0.5, 0.5 );
+            }
+            else if ( this._bSelected === false )
+            {
+                this._bSelected = true;
+                this.scale( 2.0, 2.0 );
+            }
+        };
+        
+        this.funcChipFieldEnterFrame = function()
+        {
+            if ( this._iOwner === this._parent._iOwnerState )
+            {
+                if ( this._parent._iTurnState === _gTcgBattleField.TurnState.iRefreshState )
+                {
+                    this.rotation = 0.0;
+                }
+
+                if ( this._parent._iTurnState === _gTcgBattleField.TurnState.iEndState )
+                {
+                    this.rotation = 90.0;
+                }
+            }
+        };
+        
+        var tmpPos;
+        
+        tmpPos = [ [ 450, 450 ] ];
+        tmp = this.createChip( tmpPos[0][0], tmpPos[0][1] );
+        tmp.addEventListener( "touchstart", this.funcTouchStart );
+        
+        tmpPos = [ 
+            [100, 370],
+            [150, 370],
+            [200, 370],
+            [250, 370],
+            [300, 370]
+        ];
+        
+        // Player_A 手札
+        for ( var i = 0; i < 5; i++ )
+        {
+            tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
+            tmp.addEventListener( "touchstart", this.funcTouchChip );
+        }
+       
         // Player_A 場
-        this.createChip( 100, 260 );
-        this.createChip( 150, 260 );
-        this.createChip( 200, 260 );
+        tmpPos = [ 
+            [100, 260],
+            [150, 260],
+            [200, 260]
+        ];
+        
+        for ( var i = 0; i < 3; i++ )
+        {
+            tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
+            tmp._iOwner = _gTcgBattleField.OwnerNumber.iPlayerA;
+            tmp.addEventListener( "touchstart", this.funcTouchChip );
+            tmp.addEventListener( "enterframe", this.funcChipFieldEnterFrame );
+        }
         
         // Player_A 山札
-        this.createChip( 430, 250 );
-        this.createChip( 435, 255 );
-        this.createChip( 440, 260 );
+        tmpPos = [
+            [ 430, 250 ],
+            [ 435, 255 ],
+            [ 440, 260 ]
+        ];
+        
+        for ( var i = 0; i < 3; i++ )
+        {
+            tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
+
+            if ( i === 0 )
+            {
+                tmp.addEventListener( "touchstart", this.funcTouchStart );
+            }
+        }
 
         // Player_A 捨て山
-        this.createChip( 430, 350 );
+        tmpPos = [ [ 430, 350 ] ];
+        tmp = this.createChip( tmpPos[0][0], tmpPos[0][1] );
+        tmp.addEventListener( "touchstart", this.funcTouchStart );
         
         // Player_A プレイヤー情報
-        this.createChip( 10, 250 );
-        this.createChip( 10, 300 );
-        this.createChip( 10, 350 );
+        tmpPos = [
+            [ 10, 250 ],
+            [ 10, 300 ],
+            [ 10, 350 ]
+        ];
         
+        for ( var i = 0; i < 3; i++ )
+        {
+            tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
+            tmp.addEventListener( "touchstart", this.funcTouchStart );
+        }
         
         // Player_B 手札
-        this.createChip( 100, 120 - 60 );
-        this.createChip( 150, 120 - 60 );
-        this.createChip( 200, 120 - 60 );
-        this.createChip( 250, 120 - 60 );
-        this.createChip( 300, 120 - 60 );
+        tmpPos = [
+            [ 100, 120 - 60 ],
+            [ 150, 120 - 60 ],
+            [ 200, 120 - 60 ],
+            [ 250, 120 - 60 ],
+            [ 300, 120 - 60 ]
+        ];
+        
+        for ( var i = 0; i < 5; i++ )
+        {
+            tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
+            tmp.addEventListener( "touchstart", this.funcTouchChip );
+        }
         
         // Player_B 場
-        this.createChip( 300, 240 - 60 );
-        this.createChip( 250, 240 - 60 );
-        this.createChip( 200, 240 - 60 );
+        tmpPos = [
+            [ 300, 240 - 60 ],
+            [ 250, 240 - 60 ],
+            [ 200, 240 - 60 ]
+        ];
+        
+        for ( var i = 0; i < 3; i++ )
+        {
+            tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
+            tmp._iOwner = _gTcgBattleField.OwnerNumber.iPlayerB;
+            tmp.addEventListener( "touchstart", this.funcTouchChip );
+            tmp.addEventListener( "enterframe", this.funcChipFieldEnterFrame );
+        }
         
         // Player_B 山札
-        this.createChip( 30, 250 - 60 );
-        this.createChip( 35, 245 - 60 );
-        this.createChip( 40, 240 - 60 );
-
+        tmpPos = [
+            [ 30, 250 - 60 ],
+            [ 35, 245 - 60 ],
+            [ 40, 240 - 60 ]
+        ];
+        
+        for ( var i = 0; i < 3; i++ )
+        {
+            tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
+            
+            if ( i === 0 )
+            {
+                tmp.addEventListener( "touchstart", this.funcTouchStart );
+            }
+        }
+        
         // Player_B 捨て山
-        this.createChip( 30, 150 - 60 );
+        tmpPos = [ [ 30, 150 - 60 ] ];
+        tmp = this.createChip( tmpPos[0][0], tmpPos[0][1] );
+        tmp.addEventListener( "touchstart", this.funcTouchStart );
         
         // Player_B プレイヤー情報
-        this.createChip( 410, 250 - 60 );
-        this.createChip( 410, 200 - 60 );
-        this.createChip( 410, 150 - 60 );
+        tmpPos = [
+            [ 410, 250 - 60 ],
+            [ 410, 200 - 60 ],
+            [ 410, 150 - 60 ]
+        ];
         
+        for ( var i = 0; i < 3; i++ )
+        {
+            tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
+            tmp.addEventListener( "touchstart", this.funcTouchStart );
+        }
     };
     
     // ラベルの作成
@@ -238,27 +356,34 @@ var CTcgBattleField = function() {
     // カードチップの作成
     this.createChip = function( iPosX, iPosY ) 
     {
-        var iSizeX = _gTcgBattleField.CardChip.iSizeX;
-        var iSizeY = _gTcgBattleField.CardChip.iSizeY;
+        // 大きさ
+        var iWidth  = _gTcgBattleField.CardChip.iSizeX;
+        var iHeight = _gTcgBattleField.CardChip.iSizeY;
 
-        var _field = new Sprite(iSizeX, iSizeY);
+        // スプライトの作成
+        var _sprite = new Sprite( iWidth, iHeight );
         
-        {
-            var surf = new Surface(iSizeX, iSizeY);
-            surf.context.beginPath();
-            surf.context.fillStyle = "rgba(255,0,0,0.5)";
-            surf.context.rect(0, 0, iSizeX, iSizeY);
-            //surf.context.fillRect(0, 0, iSizeX, iSizeY);
-            surf.context.stroke();
-            _field.image = surf;
+        var surf = new Surface( iWidth, iHeight );
+        surf.context.beginPath();
+        surf.context.fillStyle = "rgba(255,0,0,0.5)";
+        surf.context.rect( 0, 0, iWidth, iHeight );
+        //surf.context.fillRect(0, 0, iSizeX, iSizeY);
+        surf.context.stroke();
+        _sprite.image = surf;
 
-            _field.x = iPosX;
-            _field.y = iPosY;
-        }
+        _sprite.x = iPosX;
+        _sprite.y = iPosY;
+
+        // シーンに追加する
+        this._scene.addChild( _sprite );
         
-        this._scene.addChild( _field );
+        // 親の設定
+        _sprite._parent = this;
         
-        return _field;
+        _sprite._bSelected = false;
+        
+        // 作成したスプライトを返す
+        return _sprite;
     };
     
     return this;
