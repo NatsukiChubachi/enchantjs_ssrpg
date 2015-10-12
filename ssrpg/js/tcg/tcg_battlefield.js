@@ -248,11 +248,6 @@ var CTcgBattleField = function() {
         for ( var i = 0; i < 3; i++ )
         {
             tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
-
-            if ( i === 0 )
-            {
-                tmp.addEventListener( "touchstart", this.funcTouchStart );
-            }
         }
 
         // Player_A 捨て山
@@ -313,11 +308,6 @@ var CTcgBattleField = function() {
         for ( var i = 0; i < 3; i++ )
         {
             tmp = this.createChip( tmpPos[i][0], tmpPos[i][1] );
-            
-            if ( i === 0 )
-            {
-                tmp.addEventListener( "touchstart", this.funcTouchStart );
-            }
         }
         
         // Player_B 捨て山
