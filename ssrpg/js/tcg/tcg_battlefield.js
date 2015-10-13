@@ -172,17 +172,29 @@ var CTcgBattleField = function() {
             // this.parentNode.removeChild( this );
         };
         
+        // チップをタッチした時のイベント処理
         this.funcTouchChip = function()
         {
-            if ( this._bSelected === true )
+            if ( this._bSelected === true )         // 非選択時
             {
+                // 元に戻す
                 this._bSelected = false;
                 this.scale( 0.5, 0.5 );
+                
+                // カードを疲労状態にする
+                this.rotation = 90.0;
             }
-            else if ( this._bSelected === false )
+            else if ( this._bSelected === false )   // 選択時
             {
+                // 拡大
                 this._bSelected = true;
                 this.scale( 2.0, 2.0 );
+                
+                // TODO:
+                // カードに関する詳細を開くボタン
+                
+                // TODO:
+                // 使用できるタイミングでは使用ボタンを置く
             }
         };
         
@@ -190,13 +202,17 @@ var CTcgBattleField = function() {
         {
             if ( this._iOwner === this._parent._iOwnerState )
             {
+                // Refreshステート時
                 if ( this._parent._iTurnState === _gTcgBattleField.TurnState.iRefreshState )
                 {
+                    // カード向きを元に戻す
                     this.rotation = 0.0;
                 }
 
+                // Endステート時
                 if ( this._parent._iTurnState === _gTcgBattleField.TurnState.iEndState )
                 {
+                    // カード向きを変える（疲労状態）
                     this.rotation = 90.0;
                 }
             }
