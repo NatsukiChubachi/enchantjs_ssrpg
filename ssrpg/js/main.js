@@ -84,14 +84,16 @@ window.onload = function(){
         var _newScene = new CHighAndLow();
         _newScene.initialize( game );
         */
-        /*
+        
         // SSRPG
         var _newScene = new CSsrpgTop();
         _newScene.initialize( game );
-        */
+        
+        /*
         // TCG
         var _newScene = new CTcgTop();
         _newScene.initialize( game );
+        */
     };
     
     // ゲーム処理のスタート
