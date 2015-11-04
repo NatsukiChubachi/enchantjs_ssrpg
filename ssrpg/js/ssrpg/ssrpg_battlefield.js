@@ -7,8 +7,12 @@ var _gSsrpgBattleField_MapChipSizeX = 60;
 var _gSsrpgBattleField_MapChipSizeY = 60;
 
 var _gDefSsrpgBattleField = {
+    Window: {
+        iWidth: 500,
+        iHeight: 500
+    },
     MapChip: {
-        iOffsetX: 60,
+        iOffsetX: 70,
         iOffsetY: 40,
         iWidth: 60,
         iHeight: 60
@@ -75,6 +79,88 @@ var CSsrpgBattleField = function() {
             this._scene.addChild( _lbl );
             
             return _lbl;
+        };
+        
+        // 背景枠の作成
+        this.CreateBackSpace = function()
+        {
+            // 左枠
+            {
+                var iWinY = _gDefSsrpgBattleField.Window.iHeight;
+                
+                var iWidth = _gDefSsrpgBattleField.MapChip.iOffsetX;
+                var iHeight = iWinY - _gDefSsrpgBattleField.MapChip.iOffsetY - 100;
+                
+                var _surf = new Surface( iWidth, iHeight );
+                _surf.context.beginPath();
+                _surf.context.fillStyle = "rgba(0,0,200,0.5)";
+                _surf.context.fillRect( 0, 0, iWidth, iHeight );
+                
+                var _frame = new Sprite( iWidth, iHeight );
+                _frame.image = _surf;
+                _frame.x = 0;
+                _frame.y = _gDefSsrpgBattleField.MapChip.iOffsetY;
+                
+                this._scene.addChild( _frame );
+            }
+            // 右枠
+            {
+                var iWinY = _gDefSsrpgBattleField.Window.iHeight;
+                
+                var iWidth = _gDefSsrpgBattleField.MapChip.iOffsetX;
+                var iHeight = iWinY - _gDefSsrpgBattleField.MapChip.iOffsetY - 100;
+                
+                var _surf = new Surface( iWidth, iHeight );
+                _surf.context.beginPath();
+                _surf.context.fillStyle = "rgba(0,0,200,0.5)";
+                _surf.context.fillRect( 0, 0, iWidth, iHeight );
+                
+                var _frame = new Sprite( iWidth, iHeight );
+                _frame.image = _surf;
+                _frame.x = 500 - _gDefSsrpgBattleField.MapChip.iOffsetX;
+                _frame.y = _gDefSsrpgBattleField.MapChip.iOffsetY;
+                
+                this._scene.addChild( _frame );
+            }
+            // 真後ろ
+            {
+                var iWidth = _gDefSsrpgBattleField.Window.iWidth;
+                var iHeight = _gDefSsrpgBattleField.MapChip.iOffsetY;
+                
+                var _surf = new Surface( iWidth, iHeight );
+                _surf.context.beginPath();
+                _surf.context.fillStyle = "rgba(0,100,100,0.5)";
+                _surf.context.fillRect( 0, 0, iWidth, iHeight );
+                
+                var _frame = new Sprite( iWidth, iHeight );
+                _frame.image = _surf;
+                _frame.x = 0;
+                _frame.y = 0;
+                
+                this._scene.addChild( _frame );
+            }
+        };
+        
+        // 関数：ステ窓
+        this.CreateWindowStates = function()
+        {
+            var iWidth = 500;
+            var iHeight = 100;
+            
+            var _surf = new Surface( iWidth, iHeight );
+            _surf.context.beginPath();
+            _surf.context.fillStyle = "rgba(200,200,200,0.75)";
+            _surf.context.fillRect( 0, 0, iWidth, iHeight );
+            _surf.context.stroke();
+            
+            var _window = new Sprite( iWidth, iHeight );
+            _window.image = _surf;
+            _window.x = 0;
+            _window.y = 400;
+            
+            this._scene.addChild( _window );
+            
+            return _window;
         };
         
         // 関数：背景作成
@@ -145,6 +231,12 @@ var CSsrpgBattleField = function() {
         {
             
         } );
+        
+        // 後ろ枠の作成
+        this.CreateBackSpace();
+        
+        // ステ窓
+        this.CreateWindowStates();
         
         // 背景チップ作成
         for(var j=0; j<6; j++)
