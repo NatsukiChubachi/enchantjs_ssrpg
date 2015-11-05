@@ -67,7 +67,7 @@ var CSsrpgBattleField = function() {
         };
         
         // ラベルの作成
-        this.createLabel = function(iPosX, iPosY, sStrMsg)
+        this.CreateLabel = function(iPosX, iPosY, sStrMsg)
         {
             // ラベル作成
             var _lbl = new Label( sStrMsg );
@@ -225,7 +225,7 @@ var CSsrpgBattleField = function() {
         };
         
         // マネージャーオブジェクト
-        this._lblManager = this.createLabel( 0, 0, "!" );
+        this._lblManager = this.CreateLabel( 0, 0, "!" );
         this._lblManager._parent = this;
         this._lblManager.addEventListener( "enterframe", function()
         {
@@ -237,6 +237,25 @@ var CSsrpgBattleField = function() {
         
         // ステ窓
         this.CreateWindowStates();
+        
+        this.aryObjStatesWindow = [];
+        this.aryObjStatesWindow[ 0 ] = this.CreateChara( -1, 6, 0 );
+        this.aryObjStatesWindow[ 1 ] = this.CreateLabel( 100, 400, "ユニット名" );
+        this.aryObjStatesWindow[ 2 ] = this.CreateLabel( 10, 455, "Unit Name" );
+        this.aryObjStatesWindow[ 3 ] = this.CreateLabel( 10, 475, "Unit Jobs" );
+        this.aryObjStatesWindow[ 4 ] = this.CreateLabel( 100, 420, "Lv " + 20 );
+        this.aryObjStatesWindow[ 5 ] = this.CreateLabel( 100, 440, "Hp " + 20 + " / " + 20 );
+        this.aryObjStatesWindow[ 6 ] = this.CreateLabel( 100, 460, "Tp " + 20 + " / " + 20 );
+        this.aryObjStatesWindow[ 7 ] = this.CreateLabel( 200, 420, "Atk " + 20 );
+        this.aryObjStatesWindow[ 8 ] = this.CreateLabel( 200, 440, "Def " + 20 );
+        this.aryObjStatesWindow[ 9 ] = this.CreateLabel( 200, 460, "Agi " + 20 );
+        this.aryObjStatesWindow[ 10] = this.CreateLabel( 300, 420, "Int " + 20 );
+        this.aryObjStatesWindow[ 11] = this.CreateLabel( 300, 440, "Mnd " + 20 );
+        this.aryObjStatesWindow[ 12] = this.CreateLabel( 300, 460, "Luk " + 20 );
+        this.aryObjStatesWindow[ 13] = this.CreateLabel( 400, 420, "Mov " + 3 );
+        this.aryObjStatesWindow[ 14] = this.CreateLabel( 400, 440, "Type " + "重步" );
+        
+        
         
         // 背景チップ作成
         for(var j=0; j<6; j++)
