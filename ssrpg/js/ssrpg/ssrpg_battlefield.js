@@ -163,6 +163,47 @@ var CSsrpgBattleField = function() {
             return _window;
         };
         
+        // 関数：ステ窓文字
+        this.CreateWindowCharaStates = function()
+        {
+            this.aryObjStatesWindow = [];
+            this.aryObjStatesWindow[ 0 ] = this.CreateChara( -1, 6, 0 );
+            this.aryObjStatesWindow[ 1 ] = this.CreateLabel( 100, 400, "ユニット名" );
+            this.aryObjStatesWindow[ 2 ] = this.CreateLabel( 10, 455, "Unit Name" );
+            this.aryObjStatesWindow[ 3 ] = this.CreateLabel( 10, 475, "Unit Jobs" );
+            this.aryObjStatesWindow[ 4 ] = this.CreateLabel( 100, 420, "Lv : " + 20 );
+            this.aryObjStatesWindow[ 5 ] = this.CreateLabel( 100, 440, "Hp : " + 20 + " / " + 20 );
+            this.aryObjStatesWindow[ 6 ] = this.CreateLabel( 100, 460, "Tp : " + 20 + " / " + 20 );
+            this.aryObjStatesWindow[ 7 ] = this.CreateLabel( 200, 420, "Atk : " + 20 );
+            this.aryObjStatesWindow[ 8 ] = this.CreateLabel( 200, 440, "Def : " + 20 );
+            this.aryObjStatesWindow[ 9 ] = this.CreateLabel( 200, 460, "Agi : " + 20 );
+            this.aryObjStatesWindow[ 10] = this.CreateLabel( 300, 420, "Int : " + 20 );
+            this.aryObjStatesWindow[ 11] = this.CreateLabel( 300, 440, "Mnd : " + 20 );
+            this.aryObjStatesWindow[ 12] = this.CreateLabel( 300, 460, "Luk : " + 20 );
+            this.aryObjStatesWindow[ 13] = this.CreateLabel( 400, 420, "Mov : " + 3 );
+            this.aryObjStatesWindow[ 14] = this.CreateLabel( 400, 440, "Type : " + "重步" );
+        };
+        
+        // 関数：ステ窓描画
+        this.DrawWindowCharaStates = function( _chara )
+        {
+            this.aryObjStatesWindow[ 0 ].image = _chara.image;
+            this.aryObjStatesWindow[ 1 ].text = _chara.param.sClass;    //"ユニット名"
+            this.aryObjStatesWindow[ 2 ].text = _chara.param.sName;     //"Unit Name";
+            // this.aryObjStatesWindow[ 3 ].text = _chara.param.sClass;    //"Unit Jobs";
+            this.aryObjStatesWindow[ 4 ].text = "Lv : " + _chara.param.iLv; //20;
+            this.aryObjStatesWindow[ 5 ].text = "Hp : " + _chara.param.iHp[0] + " / " + _chara.param.iHp[1];    //20 + " / " + 20;
+            this.aryObjStatesWindow[ 6 ].text = "Tp : " + _chara.param.iTp[0] + " / " + _chara.param.iTp[1];    //20 + " / " + 20;
+            this.aryObjStatesWindow[ 7 ].text = "Atk : " + _chara.param.iAtk;   //20;
+            this.aryObjStatesWindow[ 8 ].text = "Def : " + _chara.param.iDef;   //20;
+            this.aryObjStatesWindow[ 9 ].text = "Agi : " + _chara.param.iAgi;   //20;
+            this.aryObjStatesWindow[ 10].text = "Int : " + _chara.param.iInt;   //20;
+            this.aryObjStatesWindow[ 11].text = "Mnd : " + _chara.param.iMnd;   //20;
+            this.aryObjStatesWindow[ 12].text = "Luk : " + _chara.param.iLuk;   //20;
+            this.aryObjStatesWindow[ 13].text = "Mov : " + _chara.param.iMov;   //3;
+            // this.aryObjStatesWindow[ 14].text = "Type : " + "重步";
+        };
+        
         // 関数：背景作成
         this.CreateChip = function( x, y )
         {
@@ -188,7 +229,7 @@ var CSsrpgBattleField = function() {
         };
         
         // 関数：キャラ作成
-        this.CreateChara = function( x, y, iTeam )
+        this.CreateChara = function( x, y, iTeam, param )
         {
             var iWidth = _gDefSsrpgBattleField.MapChip.iWidth;
             var iHeight = _gDefSsrpgBattleField.MapChip.iHeight;
@@ -219,6 +260,8 @@ var CSsrpgBattleField = function() {
             _chara.x = _posTmp.x;
             _chara.y = _posTmp.y;
             
+            _chara.param = param;
+            
             this._scene.addChild( _chara );
             
             return _chara;
@@ -235,27 +278,9 @@ var CSsrpgBattleField = function() {
         // 後ろ枠の作成
         this.CreateBackSpace();
         
-        // ステ窓
+        // ステ窓(モック)
         this.CreateWindowStates();
-        
-        this.aryObjStatesWindow = [];
-        this.aryObjStatesWindow[ 0 ] = this.CreateChara( -1, 6, 0 );
-        this.aryObjStatesWindow[ 1 ] = this.CreateLabel( 100, 400, "ユニット名" );
-        this.aryObjStatesWindow[ 2 ] = this.CreateLabel( 10, 455, "Unit Name" );
-        this.aryObjStatesWindow[ 3 ] = this.CreateLabel( 10, 475, "Unit Jobs" );
-        this.aryObjStatesWindow[ 4 ] = this.CreateLabel( 100, 420, "Lv " + 20 );
-        this.aryObjStatesWindow[ 5 ] = this.CreateLabel( 100, 440, "Hp " + 20 + " / " + 20 );
-        this.aryObjStatesWindow[ 6 ] = this.CreateLabel( 100, 460, "Tp " + 20 + " / " + 20 );
-        this.aryObjStatesWindow[ 7 ] = this.CreateLabel( 200, 420, "Atk " + 20 );
-        this.aryObjStatesWindow[ 8 ] = this.CreateLabel( 200, 440, "Def " + 20 );
-        this.aryObjStatesWindow[ 9 ] = this.CreateLabel( 200, 460, "Agi " + 20 );
-        this.aryObjStatesWindow[ 10] = this.CreateLabel( 300, 420, "Int " + 20 );
-        this.aryObjStatesWindow[ 11] = this.CreateLabel( 300, 440, "Mnd " + 20 );
-        this.aryObjStatesWindow[ 12] = this.CreateLabel( 300, 460, "Luk " + 20 );
-        this.aryObjStatesWindow[ 13] = this.CreateLabel( 400, 420, "Mov " + 3 );
-        this.aryObjStatesWindow[ 14] = this.CreateLabel( 400, 440, "Type " + "重步" );
-        
-        
+        this.CreateWindowCharaStates();
         
         // 背景チップ作成
         for(var j=0; j<6; j++)
@@ -267,27 +292,160 @@ var CSsrpgBattleField = function() {
         }
         
         // プレイヤー試作
+        var _aryCharaParam = [
+            {
+                sClass: "テストユニット",
+                sName: "Chara1",
+                iLv: 1,
+                iHp: [20, 20],
+                iTp: [10, 10],
+                iAtk: 10,
+                iDef: 10,
+                iAgi: 10,
+                iInt: 10,
+                iMnd: 10,
+                iLuk: 10,
+                iMov: 1,
+                arySpecial: [],
+                aryCommand: []
+            },
+            {
+                sClass: "テストユニット",
+                sName: "Chara2",
+                iLv: 2,
+                iHp: [21, 21],
+                iTp: [11, 11],
+                iAtk: 11,
+                iDef: 11,
+                iAgi: 11,
+                iInt: 11,
+                iMnd: 11,
+                iLuk: 11,
+                iMov: 1,
+                arySpecial: [],
+                aryCommand: []
+            },
+            {
+                sClass: "テストユニット",
+                sName: "Chara3",
+                iLv: 3,
+                iHp: [22, 22],
+                iTp: [12, 12],
+                iAtk: 12,
+                iDef: 12,
+                iAgi: 12,
+                iInt: 12,
+                iMnd: 12,
+                iLuk: 12,
+                iMov: 1,
+                arySpecial: [],
+                aryCommand: []
+            },
+            {
+                sClass: "テストユニット",
+                sName: "Chara4",
+                iLv: 4,
+                iHp: [23, 23],
+                iTp: [13, 13],
+                iAtk: 13,
+                iDef: 13,
+                iAgi: 13,
+                iInt: 13,
+                iMnd: 13,
+                iLuk: 13,
+                iMov: 1,
+                arySpecial: [],
+                aryCommand: []
+            },
+            {
+                sClass: "テストユニット",
+                sName: "Chara5",
+                iLv: 1,
+                iHp: [20, 20],
+                iTp: [10, 10],
+                iAtk: 10,
+                iDef: 10,
+                iAgi: 10,
+                iInt: 10,
+                iMnd: 10,
+                iLuk: 10,
+                iMov: 1,
+                arySpecial: [],
+                aryCommand: []
+            },
+            {
+                sClass: "テストユニット",
+                sName: "Chara6",
+                iLv: 2,
+                iHp: [21, 21],
+                iTp: [11, 11],
+                iAtk: 11,
+                iDef: 11,
+                iAgi: 11,
+                iInt: 11,
+                iMnd: 11,
+                iLuk: 11,
+                iMov: 1,
+                arySpecial: [],
+                aryCommand: []
+            },
+            {
+                sClass: "テストユニット",
+                sName: "Chara7",
+                iLv: 3,
+                iHp: [22, 22],
+                iTp: [12, 12],
+                iAtk: 12,
+                iDef: 12,
+                iAgi: 12,
+                iInt: 12,
+                iMnd: 12,
+                iLuk: 12,
+                iMov: 1,
+                arySpecial: [],
+                aryCommand: []
+            },
+            {
+                sClass: "テストユニット",
+                sName: "Chara8",
+                iLv: 4,
+                iHp: [23, 23],
+                iTp: [13, 13],
+                iAtk: 13,
+                iDef: 13,
+                iAgi: 13,
+                iInt: 13,
+                iMnd: 13,
+                iLuk: 13,
+                iMov: 1,
+                arySpecial: [],
+                aryCommand: []
+            }
+        ];
+        
         var _aryChara = [
-            [ 5, 0, 0 ],
-            [ 5, 1, 0 ],
-            [ 5, 2, 0 ],
-            [ 5, 3, 0 ],
+            [ 5, 0, 0, _aryCharaParam[0] ],
+            [ 5, 1, 0, _aryCharaParam[1] ],
+            [ 5, 2, 0, _aryCharaParam[2] ],
+            [ 5, 3, 0, _aryCharaParam[3] ],
             
-            [ 0, 2, 1 ],
-            [ 0, 3, 1 ],
-            [ 0, 4, 1 ],
-            [ 0, 5, 1 ]
+            [ 0, 2, 1, _aryCharaParam[4] ],
+            [ 0, 3, 1, _aryCharaParam[5] ],
+            [ 0, 4, 1, _aryCharaParam[6] ],
+            [ 0, 5, 1, _aryCharaParam[7] ]
         ];
         
         this._funcTouchStart = function()
         {
-            alert( "Touch!" );
+            // alert( "Touch!" );
+            this._parent.DrawWindowCharaStates( this );
         };
         
         for ( var i=0; i<_aryChara.length; i++ )
         {
-            var _charaTmp = this.CreateChara( _aryChara[i][0], _aryChara[i][1], _aryChara[i][2] );
+            var _charaTmp = this.CreateChara( _aryChara[i][0], _aryChara[i][1], _aryChara[i][2], _aryChara[i][3] );
             _charaTmp.addEventListener( "touchstart", this._funcTouchStart );
+            _charaTmp._parent = this;
         }
     };
     
