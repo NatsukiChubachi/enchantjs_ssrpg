@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>get started with three.js</title>
+</head>
+<body>
+ 
+<script src="js/three.min.js"></script>
+<script>
+    
+var main = function () 
+{
+    var scene = new THREE.Scene();
+
+    var width  = 600;
+    var height = 600;
+    var fov    = 60;
+    var aspect = width / height;
+    var near   = 1;
+    var far    = 1000;
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize( width, height );
+    document.body.appendChild( renderer.domElement );
+  
+    // 前の描画結果を消さないようにする
+    renderer.autoClear = false;
+    
+    // カメラの追加
+    var camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+    camera.position.set( 0, 0, 100 );
+    camera.aspect = 0.5 * width / height;
+    // camera.updateProjectionMatrix();
+    
+    var b_camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+    b_camera.position.set(0, 0, 200);
+    // b_camera.aspect = width / height;
+    b_camera.aspect = width / height;
+    // b_camera.updateProjectionMatrix();
+
+    // カメラ
+    var directionalLight = new THREE.DirectionalLight( 0xffffff );
+    directionalLight.position.set( 0, 0.7, 0.7 );
+    scene.add( directionalLight );
+ 
+    // 四角形
+    var geometry = new THREE.CubeGeometry( 20, 20, 20 );
+    var material = new THREE.MeshPhongMaterial( { color: 0xff0000 } );
+    var mesh = new THREE.Mesh( geometry, material );
+    scene.add( mesh );
+ 
+    // 球体の作成
+    var sphereGeometry = new THREE.SphereGeometry(10);
+    var sphereMaterial = new THREE.MeshLambertMaterial({color: '#3498DB'});
+    var sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    sphereMesh.position.set(30, 20, 30);
+    scene.add(sphereMesh);
+
+ /*
+    (function resize() {
+        camera.aspect = 0.5 * window.innerWidth / window.innerHeight;
+        // camera.updateProjectionMatrix(); 
+        
+        b_camera.aspect = 0.5 * window.innerWidth / window.innerHeight;
+        // b_camera.updateProjectionMatrix(); 
+    })();
+*/
+    // var controls = new THREE.TrackballControls( camera );
+
+    // 描画部分
+    ( function renderLoop () {
+        
+        // controls.update();
+        
+        requestAnimationFrame( renderLoop );
+        
+        mesh.rotation.set(
+            0,
+            mesh.rotation.y + .01,
+            mesh.rotation.z + .01
+        );
+
+        sphereMesh.rotation.set(
+            0,
+            sphereMesh.rotation.y + .01,
+            sphereMesh.rotation.z + .01
+        );
+/*
+        renderer.setViewport( 0, 0, width / 2, height ); // 追加
+        camera.updateProjectionMatrix();
+        renderer.render( scene, camera );
+        
+        renderer.setViewport( width / 2, 0, width / 2, height ); // 追加
+        renderer.setScissor( 0, 0, width, height );
+        renderer.render( scene, b_camera );
+*/
+
+        renderer.enableScissorTest( true );
+        
+        camera.updateProjectionMatrix();
+        b_camera.updateProjectionMatrix(); 
+        
+        renderer.setViewport( 0, 0, width / 2, height ); // 追加
+        
+        renderer.setScissor( 0, height/2, 100, height/2 );
+        renderer.render( scene, camera );
+        
+        renderer.setScissor( 100, 0, 100, height );
+        renderer.render( scene, camera );
+        
+        renderer.setViewport( width / 2, 0, width / 2, height ); // 追加
+        renderer.setScissor( 0, 0, width, height );
+        renderer.render( scene, b_camera );
+
+    } )();
+};
+ 
+window.addEventListener( 'DOMContentLoaded', main, false );
+</script>
+ 
+</body>
+</html>
+
