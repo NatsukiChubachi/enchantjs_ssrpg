@@ -16,6 +16,17 @@ var _gDefSsrpgBattleField = {
         iOffsetY: 40,
         iWidth: 60,
         iHeight: 60
+    },
+    GameState: {
+        iNoState: -1,
+        iBeginGameState: 0,
+        iStartPlayerState: 1,
+        iTurnStart: 2,
+        iSelectUnit: 3,
+        iSelectMovePos: 4,
+        iPlayerUnitMoveMotion: 5,
+        iDecideMovePos: 6,
+        iSelectAction: 7
     }
 };
 
@@ -270,9 +281,65 @@ var CSsrpgBattleField = function() {
         // マネージャーオブジェクト
         this._lblManager = this.CreateLabel( 0, 0, "!" );
         this._lblManager._parent = this;
+        this._lblManager._iSelectedUnit = null;
+        this._lblManager._iSelectedPos = null;
+        this._lblManager._iGameState = _gDefSsrpgBattleField.GameState.iBeginGameState;
         this._lblManager.addEventListener( "enterframe", function()
         {
-            
+            switch( this._iGameState )
+            {
+                // このシーンが開始する時のステート
+                case _gDefSsrpgBattleField.GameState.iBeginGameState:
+                    alert( "BeginGameState" );
+                    alert( "StartPlayerState" );
+                    this._iSelectedUnit = null;
+                    this._iSelectedPos = null;
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iStartPlayerState;
+                    break;
+                    
+                // プレイヤーターンの開始ステート
+                case _gDefSsrpgBattleField.GameState.iStartPlayerState:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iSelectUnit;
+                    break;
+                
+                // ユニット選択ステート
+                case _gDefSsrpgBattleField.GameState.iSelectUnit:
+                    if ( this._iSelectedUnit !== null )
+                    {
+                        alert( "SelectedUnit : " + this._iSelectedUnit );
+                        this._iGameState = _gDefSsrpgBattleField.GameState.iSelectMovePos;
+                    }
+                    break;
+                    
+                // 移動位置選択ステート    
+                case _gDefSsrpgBattleField.GameState.iSelectMovePos:
+                    if ( this._iSelectedPos !== null )
+                    {
+                        alert( "SelectedPos : " + this._iSelectedPos );
+                        this._iGameState = _gDefSsrpgBattleField.GameState.iPlayerUnitMoveMotion;
+                    }
+                    break;
+                    
+                // 移動待ちステート
+                case _gDefSsrpgBattleField.GameState.iPlayerUnitMoveMotion:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iDecideMovePos;
+                    break;
+                    
+                // 移動決定ステート
+                case _gDefSsrpgBattleField.GameState.iDecideMovePos:
+                    var _getPos = this._iSelectedPos;
+                    var _posTmp = this._parent.GetSPos( _getPos.x, _getPos.y );
+                    
+                    this._iSelectedUnit.x = _posTmp;
+                    this._iSelectedUnit.y = _posTmp;
+                    
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iSelectAction;
+                    break;
+                    
+                // 行動選択ステート
+                case _gDefSsrpgBattleField.GameState.iSelectAction:
+                    break;
+            }
         } );
         
         // 後ろ枠の作成
@@ -282,16 +349,28 @@ var CSsrpgBattleField = function() {
         this.CreateWindowStates();
         this.CreateWindowCharaStates();
         
+        // ユニットタッチ時のイベント（試作）
+        this._funcMapTouchStart = function()
+        {
+            this._parent._lblManager._iSelectedPos = this._Pos;            
+        };
+        
         // 背景チップ作成
         for(var j=0; j<6; j++)
         {
             for(var i=0; i<6; i++)
             {
-                this.CreateChip( i, j );
+                var _mapTmp = this.CreateChip( i, j );
+                _mapTmp.addEventListener( "touchstart", this._funcMapTouchStart );
+                _mapTmp._parent = this;
+                _mapTmp._Pos = {
+                    x: i,
+                    y: j
+                };
             }
         }
         
-        // プレイヤー試作
+        // ユニットパラメータの設定
         var _aryCharaParam = [
             {
                 sClass: "テストユニット",
@@ -423,6 +502,7 @@ var CSsrpgBattleField = function() {
             }
         ];
         
+        // ユニット配置配列
         var _aryChara = [
             [ 5, 0, 0, _aryCharaParam[0] ],
             [ 5, 1, 0, _aryCharaParam[1] ],
@@ -435,17 +515,25 @@ var CSsrpgBattleField = function() {
             [ 0, 5, 1, _aryCharaParam[7] ]
         ];
         
-        this._funcTouchStart = function()
+        // ユニットタッチ時のイベント（試作）
+        this._funcUnitTouchStart = function()
         {
             // alert( "Touch!" );
+            
+            // ステータスウィンドウの描画
             this._parent.DrawWindowCharaStates( this );
+            
+            // ユニット選択インデックスを渡す
+            this._parent._lblManager._iSelectedUnit = this;
         };
         
+        // ユニットの配置
         for ( var i=0; i<_aryChara.length; i++ )
         {
             var _charaTmp = this.CreateChara( _aryChara[i][0], _aryChara[i][1], _aryChara[i][2], _aryChara[i][3] );
-            _charaTmp.addEventListener( "touchstart", this._funcTouchStart );
+            _charaTmp.addEventListener( "touchstart", this._funcUnitTouchStart );
             _charaTmp._parent = this;
+            _charaTmp._iIndex = i;
         }
     };
     
