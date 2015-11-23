@@ -17,6 +17,10 @@ var _gDefSsrpgBattleField = {
         iWidth: 60,
         iHeight: 60
     },
+    EffectiveAreaType: {
+        iAttack: 0,
+        iDefence: 1
+    },
     GameState: {
         iNoState: -1,
         iBeginGameState: 0,
@@ -26,7 +30,8 @@ var _gDefSsrpgBattleField = {
         iSelectMovePos: 4,
         iPlayerUnitMoveMotion: 5,
         iDecideMovePos: 6,
-        iSelectAction: 7
+        iSelectAction: 7,
+        iCalcActionArea: 8
     }
 };
 
@@ -239,6 +244,40 @@ var CSsrpgBattleField = function() {
             return _field;
         };
         
+        // 関数：行動範囲チップ作成
+        this.CreateEffectiveAreaChip = function( x, y, iType )
+        {
+            var iWidth = _gDefSsrpgBattleField.MapChip.iWidth;
+            var iHeight = _gDefSsrpgBattleField.MapChip.iHeight;
+            
+            var surf = new Surface( iWidth, iHeight );
+            surf.context.beginPath();
+            
+            switch( iType )
+            {
+                case _gDefSsrpgBattleField.EffectiveAreaType.iAttack:
+                    surf.context.fillStyle = "rgba(255,255,0,0.5)";
+                    break;
+                case _gDefSsrpgBattleField.EffectiveAreaType.iDefence:
+                    surf.context.fullStyle = "rgba(0,0,255,0.5)";
+                    break;
+            };
+            
+            surf.context.rect( 0, 0, iWidth, iHeight );
+            surf.context.stroke();
+            
+            var _posTmp = this.GetScrPos( x, y );
+            
+            var _field = new Sprite( iWidth, iHeight );
+            _field.image = surf;
+            _field.x = _posTmp.x;
+            _field.y = _posTmp.y;
+
+            this._scene.addChild( _field );
+            
+            return _field;
+        };
+        
         // 関数：キャラ作成
         this.CreateChara = function( x, y, iTeam, param )
         {
@@ -272,6 +311,10 @@ var CSsrpgBattleField = function() {
             _chara.y = _posTmp.y;
             
             _chara.param = param;
+            _chara._pos = {
+                x: x,
+                y: y
+            };
             
             this._scene.addChild( _chara );
             
@@ -328,16 +371,40 @@ var CSsrpgBattleField = function() {
                 // 移動決定ステート
                 case _gDefSsrpgBattleField.GameState.iDecideMovePos:
                     var _getPos = this._iSelectedPos;
-                    var _posTmp = this._parent.GetSPos( _getPos.x, _getPos.y );
+                    var _posTmp = this._parent.GetScrPos( _getPos.x, _getPos.y );
                     
-                    this._iSelectedUnit.x = _posTmp;
-                    this._iSelectedUnit.y = _posTmp;
+                    this._iSelectedUnit.x = _posTmp.x;
+                    this._iSelectedUnit.y = _posTmp.y;
+                    
+                    this._iSelectedUnit._pos.x = _getPos.x;
+                    this._iSelectedUnit._pos.y = _getPos.y;
                     
                     this._iGameState = _gDefSsrpgBattleField.GameState.iSelectAction;
                     break;
                     
                 // 行動選択ステート
                 case _gDefSsrpgBattleField.GameState.iSelectAction:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iCalcActionArea;
+                    break;
+                    
+                // 行動範囲計算ステート
+                case _gDefSsrpgBattleField.GameState.iCalcActionArea:
+                    var _pos = this._iSelectedUnit._pos;
+                    /*
+                    this._parent.CreateEffectiveAreaChip( _pos.x, _pos.y, 0 );
+                    this._parent.CreateEffectiveAreaChip( _pos.x - 1, _pos.y, 0 );
+                    this._parent.CreateEffectiveAreaChip( _pos.x + 1, _pos.y, 0 );
+                    this._parent.CreateEffectiveAreaChip( _pos.x, _pos.y - 1, 0 );
+                    */
+                    var _mapTmp = this._parent.CreateEffectiveAreaChip( _pos.x, _pos.y + 1, 0 );
+                    _mapTmp.addEventListener( "touchstart", this._funcMapTouchStart );
+                    _mapTmp._parent = this;
+                    _mapTmp._Pos = {
+                        x: _pos.x,
+                        y: _pos.y + 1
+                    };
+                    
+                    this._iGameState = -1;
                     break;
             }
         } );
@@ -534,6 +601,10 @@ var CSsrpgBattleField = function() {
             _charaTmp.addEventListener( "touchstart", this._funcUnitTouchStart );
             _charaTmp._parent = this;
             _charaTmp._iIndex = i;
+            _charaTmp._pos = {
+                x: _aryChara[i][0],
+                y: _aryChara[i][1]
+            };
         }
     };
     
