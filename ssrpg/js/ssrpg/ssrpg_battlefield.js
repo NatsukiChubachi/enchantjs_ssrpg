@@ -31,7 +31,10 @@ var _gDefSsrpgBattleField = {
         iPlayerUnitMoveMotion: 5,
         iDecideMovePos: 6,
         iSelectAction: 7,
-        iCalcActionArea: 8
+        iCalcActionArea: 8,
+        iSelectActionPos: 9,
+        iActionExecute: 10,
+        iCheckAfterAction: 11
     }
 };
 
@@ -256,14 +259,15 @@ var CSsrpgBattleField = function() {
             switch( iType )
             {
                 case _gDefSsrpgBattleField.EffectiveAreaType.iAttack:
-                    surf.context.fillStyle = "rgba(255,255,0,0.5)";
+                    surf.context.fillStyle = "rgba(255,0,0,0.4)";
                     break;
                 case _gDefSsrpgBattleField.EffectiveAreaType.iDefence:
-                    surf.context.fullStyle = "rgba(0,0,255,0.5)";
+                    surf.context.fullStyle = "rgba(0,255,0,0.4)";
                     break;
             };
             
-            surf.context.rect( 0, 0, iWidth, iHeight );
+            //surf.context.rect( 0, 0, iWidth, iHeight );
+            surf.context.fillRect( 5, 5, 50, 50 );
             surf.context.stroke();
             
             var _posTmp = this.GetScrPos( x, y );
@@ -390,20 +394,78 @@ var CSsrpgBattleField = function() {
                 // 行動範囲計算ステート
                 case _gDefSsrpgBattleField.GameState.iCalcActionArea:
                     var _pos = this._iSelectedUnit._pos;
-                    /*
-                    this._parent.CreateEffectiveAreaChip( _pos.x, _pos.y, 0 );
-                    this._parent.CreateEffectiveAreaChip( _pos.x - 1, _pos.y, 0 );
-                    this._parent.CreateEffectiveAreaChip( _pos.x + 1, _pos.y, 0 );
-                    this._parent.CreateEffectiveAreaChip( _pos.x, _pos.y - 1, 0 );
-                    */
-                    var _mapTmp = this._parent.CreateEffectiveAreaChip( _pos.x, _pos.y + 1, 0 );
-                    _mapTmp.addEventListener( "touchstart", this._funcMapTouchStart );
-                    _mapTmp._parent = this;
-                    _mapTmp._Pos = {
-                        x: _pos.x,
-                        y: _pos.y + 1
+
+                    var _aryAttack = [
+                        [_pos.x-1, _pos.y],
+                        [_pos.x+1, _pos.y],
+                        [_pos.x, _pos.y-1],
+                        [_pos.x, _pos.y+1]
+                    ];
+                    
+                    this._funcActionAreaTouchStart = function()
+                    {
+                        this._parent._iSelectedPos = this._Pos;            
                     };
                     
+                    this._aryActMap = [];
+                    for ( var i = 0; i < _aryAttack.length; i++ )
+                    {
+                        var _ActMapTmp = this._parent.CreateEffectiveAreaChip( _aryAttack[i][0], _aryAttack[i][1], 0 );
+                        _ActMapTmp.addEventListener( "touchstart", this._funcActionAreaTouchStart );
+                        _ActMapTmp._parent = this;
+                        _ActMapTmp._Pos = {
+                            x: _aryAttack[i][0],
+                            y: _aryAttack[i][1]
+                        };
+                        this._aryActMap.push( _ActMapTmp );
+                    }
+                    
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iSelectActionPos;
+                    this._iSelectedPos = null;
+                    break;
+                
+                // 行動位置選択ステート
+                case _gDefSsrpgBattleField.GameState.iSelectActionPos:
+                    if ( this._iSelectedPos !== null )
+                    {
+                        this._iGameState = _gDefSsrpgBattleField.GameState.iActionExecute;
+                        
+                        // 行動範囲MAPチップを削除
+                        for ( var i = 0; i < this._aryActMap.length; i++ )
+                        {
+                            this._parent._scene.removeChild( this._aryActMap[i] );
+                        }
+                    }
+                    break;
+                    
+                // 行動実行ステート
+                case _gDefSsrpgBattleField.GameState.iActionExecute:
+                    var _aryChara = this._parent._aryChara;
+                    for ( var i = 0; i < _aryChara.length; i++ )
+                    {
+                        if ( 
+                            this._iSelectedPos.x === _aryChara[ i ][0] &&
+                            this._iSelectedPos.y === _aryChara[ i ][1]
+                            )
+                        {
+                            _aryChara[i][3].iHp[0] -= 100;
+                        }
+                    }
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iCheckAfterAction;
+                    break;
+                    
+                // 行動後チェック
+                case _gDefSsrpgBattleField.GameState.iCheckAfterAction:
+                    var _aryChara = this._parent._aryChara;
+                    /*
+                    for ( var i = 0; i < _aryChara.length; i++ )
+                    {
+                        if ( _aryChara[i][3].iHp[0] <= 0 )
+                        {
+                            this._parent.removeChild( );
+                        }
+                    }
+                    */
                     this._iGameState = -1;
                     break;
             }
@@ -570,7 +632,7 @@ var CSsrpgBattleField = function() {
         ];
         
         // ユニット配置配列
-        var _aryChara = [
+        this._aryChara = [
             [ 5, 0, 0, _aryCharaParam[0] ],
             [ 5, 1, 0, _aryCharaParam[1] ],
             [ 5, 2, 0, _aryCharaParam[2] ],
@@ -595,15 +657,15 @@ var CSsrpgBattleField = function() {
         };
         
         // ユニットの配置
-        for ( var i=0; i<_aryChara.length; i++ )
+        for ( var i=0; i<this._aryChara.length; i++ )
         {
-            var _charaTmp = this.CreateChara( _aryChara[i][0], _aryChara[i][1], _aryChara[i][2], _aryChara[i][3] );
+            var _charaTmp = this.CreateChara( this._aryChara[i][0], this._aryChara[i][1], this._aryChara[i][2], this._aryChara[i][3] );
             _charaTmp.addEventListener( "touchstart", this._funcUnitTouchStart );
             _charaTmp._parent = this;
             _charaTmp._iIndex = i;
             _charaTmp._pos = {
-                x: _aryChara[i][0],
-                y: _aryChara[i][1]
+                x: this._aryChara[i][0],
+                y: this._aryChara[i][1]
             };
         }
     };
