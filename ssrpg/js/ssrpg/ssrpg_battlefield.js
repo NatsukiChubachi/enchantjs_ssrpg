@@ -22,19 +22,35 @@ var _gDefSsrpgBattleField = {
         iDefence: 1
     },
     GameState: {
+        // スタートステート
         iNoState: -1,
         iBeginGameState: 0,
-        iStartPlayerState: 1,
-        iTurnStart: 2,
-        iSelectUnit: 3,
-        iSelectMovePos: 4,
-        iPlayerUnitMoveMotion: 5,
-        iDecideMovePos: 6,
-        iSelectAction: 7,
-        iCalcActionArea: 8,
-        iSelectActionPos: 9,
-        iActionExecute: 10,
-        iCheckAfterAction: 11
+        
+        // プレイヤーステート
+        iStartPlayerState: 101,
+        iTurnStart: 102,
+        iSelectUnit: 103,
+        iSelectMovePos: 104,
+        iPlayerUnitMoveMotion: 105,
+        iDecideMovePos: 106,
+        iSelectAction: 107,
+        iCalcActionArea: 108,
+        iSelectActionPos: 109,
+        iActionExecute: 110,
+        iCheckAfterAction: 111,
+        iEndPlayerState: 112,
+        
+        // エネミーステート
+        iStartEnemyState: 201,
+        iEndEnemyState: 212,
+        
+        // バトルエンドチェック
+        iBattleEndCheckState: 300,
+        
+        // バトルエンドステート
+        iEndBattleState: 1000,
+        iBattleResultState: 1001,
+        iEndGameState: 1002
     }
 };
 
@@ -631,7 +647,13 @@ var CSsrpgBattleField = function() {
                             this._iSelectedPos.y === _aryChara[ hogeKeys[ i ] ]._pos.y
                             )
                         {
+                            // ダメージ処理
                             _aryChara[ hogeKeys[i] ]._param.iHp[0] -= 100;
+                            // 死亡処理
+                            if ( _aryChara[ hogeKeys[i] ]._param.iHp[0] < 0 )
+                            {
+                                this._parent._scene.removeChild( _aryChara[ hogeKeys[i] ] );
+                            }
                         }
                     }
                     this._iGameState = _gDefSsrpgBattleField.GameState.iCheckAfterAction;
@@ -639,7 +661,48 @@ var CSsrpgBattleField = function() {
                     
                 // 行動後チェック
                 case _gDefSsrpgBattleField.GameState.iCheckAfterAction:
-                    this._iGameState = _gDefSsrpgBattleField.GameState.iBeginGameState;
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEndPlayerState;
+                    break;
+                    
+                // プレイヤーステートの終了
+                case _gDefSsrpgBattleField.GameState.iEndPlayerState:
+                    alert( "EndPlayerState" );
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iStartEnemyState;
+                    break;
+                
+                // エネミーステートの開始
+                case _gDefSsrpgBattleField.GameState.iStartEnemyState:
+                    alert( "StartEnemyState" );
+                    this._iSelectedUnit = null;
+                    this._iSelectedPos = null;
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEndEnemyState;
+                    break;
+                    
+                // エネミーステートの終了
+                case _gDefSsrpgBattleField.GameState.iEndEnemyState:
+                    alert( "EndEnemyState" );
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iStartPlayerState;
+                    break;
+                    
+                // バトル終了チェックステート
+                case _gDefSsrpgBattleField.GameState.iBattleEndCheckState:
+                    alert( "CheckBattleEnd" );
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iStartPlayerState;
+                    break;
+                    
+                // バトル終了ステート
+                case _gDefSsrpgBattleField.GameState.iEndBattleState:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iBattleResultState;
+                    break;
+                    
+                // バトル結果ステート
+                case _gDefSsrpgBattleField.GameState.iBattleResultState:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEndGameState;
+                    break;
+                    
+                // ゲーム終了ステート
+                case _gDefSsrpgBattleField.GameState.iEndGameState:
+                    this._iGameState = -1;
                     break;
             }
         } );
