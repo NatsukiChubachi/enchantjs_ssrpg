@@ -42,6 +42,8 @@ var _gDefSsrpgBattleField = {
         
         // エネミーステート
         iStartEnemyState: 201,
+        iEnemyTurnStart: 202,
+        iEnemyTurnEnd: 203,
         iEndEnemyState: 212,
         
         // バトルエンドチェック
@@ -675,6 +677,16 @@ var CSsrpgBattleField = function() {
                     alert( "StartEnemyState" );
                     this._iSelectedUnit = null;
                     this._iSelectedPos = null;
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemyTurnStart;
+                    break;
+                    
+                // エネミーターン開始
+                case _gDefSsrpgBattleField.GameState.iEnemyTurnStart:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemyTurnEnd;
+                    break;
+                    
+                // エネミーターン終了
+                case _gDefSsrpgBattleField.GameState.iEnemyTurnEnd:
                     this._iGameState = _gDefSsrpgBattleField.GameState.iEndEnemyState;
                     break;
                     
