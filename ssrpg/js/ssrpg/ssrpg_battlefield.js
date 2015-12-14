@@ -43,7 +43,15 @@ var _gDefSsrpgBattleField = {
         // エネミーステート
         iStartEnemyState: 201,
         iEnemyTurnStart: 202,
-        iEnemyTurnEnd: 203,
+        iEnemySelectUnit: 203,
+        iEnemySelectMovePos: 204,
+        iEnemyUnitMoveMotion: 205,
+        iEnemySelectAction: 206,
+        iEnemyCalcActionArea: 207,
+        iEnemySelectActionPos: 208,
+        iEnemyActionExecute: 209,
+        iEnemyCheckAfterAction: 210,
+        iEnemyTurnEnd: 211,
         iEndEnemyState: 212,
         
         // バトルエンドチェック
@@ -129,6 +137,7 @@ var CSsrpgBattleCommon = function( _scene ) {
         _chara.y = _posTmp.y;
 
         _chara._param = param;
+        _chara._team = iTeam;
         _chara._pos = {
             x: x,
             y: y
@@ -491,6 +500,7 @@ var _manager = null;
 // SSRPG戦場クラス
 var CSsrpgBattleField = function() {
     
+    
     // 初期化処理
     this.initialize = function( _game ) 
     {
@@ -521,18 +531,24 @@ var CSsrpgBattleField = function() {
         // 作成したシーンを追加する
         this._game.pushScene( this._scene );
         
+        
         // マネージャーオブジェクト
-        this._lblManager = _common.CreateLabel( 0, 0, "!" );
+        this._lblManager = _common.CreateLabel( 0, 0, "" );
         this._lblManager._parent = this;
         this._lblManager._info = {
             _map: {},
-            _chara: {}
+            _chara: {},
+            _movearea: {},
+            _actarea: {}
         };
         this._lblManager._iSelectedUnit = null;
         this._lblManager._iSelectedPos = null;
         this._lblManager._iGameState = _gDefSsrpgBattleField.GameState.iBeginGameState;
         this._lblManager.addEventListener( "enterframe", function()
         {
+            var _parent = this._parent;
+            
+            // ステート別処理
             switch( this._iGameState )
             {
                 // このシーンが開始する時のステート
@@ -651,11 +667,6 @@ var CSsrpgBattleField = function() {
                         {
                             // ダメージ処理
                             _aryChara[ hogeKeys[i] ]._param.iHp[0] -= 100;
-                            // 死亡処理
-                            if ( _aryChara[ hogeKeys[i] ]._param.iHp[0] < 0 )
-                            {
-                                this._parent._scene.removeChild( _aryChara[ hogeKeys[i] ] );
-                            }
                         }
                     }
                     this._iGameState = _gDefSsrpgBattleField.GameState.iCheckAfterAction;
@@ -663,12 +674,15 @@ var CSsrpgBattleField = function() {
                     
                 // 行動後チェック
                 case _gDefSsrpgBattleField.GameState.iCheckAfterAction:
+                    // 行動後のユニット消滅処理
+                    this.CheckAfterAction();
                     this._iGameState = _gDefSsrpgBattleField.GameState.iEndPlayerState;
                     break;
                     
                 // プレイヤーステートの終了
                 case _gDefSsrpgBattleField.GameState.iEndPlayerState:
                     alert( "EndPlayerState" );
+                    // 敵全滅で勝ち
                     this._iGameState = _gDefSsrpgBattleField.GameState.iStartEnemyState;
                     break;
                 
@@ -682,6 +696,73 @@ var CSsrpgBattleField = function() {
                     
                 // エネミーターン開始
                 case _gDefSsrpgBattleField.GameState.iEnemyTurnStart:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemySelectUnit;
+                    break;
+                    
+                // エネミーユニット選択
+                case _gDefSsrpgBattleField.GameState.iEnemySelectUnit:
+                    var _aryChara = this._info._chara;
+                    var hogeKeys = Object.keys( _aryChara );
+                    for (var i = 0, len = hogeKeys.length; i < len; i++) 
+                    {
+                        if ( 
+                            _aryChara[ hogeKeys[ i ] ]._team === 1 &&
+                            _aryChara[ hogeKeys[ i ] ]._param.iHp[ 0 ] > 0
+                            )
+                        {
+                            this._iSelectedUnit = i;
+                            this._iSelectedPos = {
+                                x: _aryChara[ hogeKeys[ i ] ]._pos.x + 1,
+                                y: _aryChara[ hogeKeys[ i ] ]._pos.y
+                            };
+                            break;
+                        }
+                    }
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemySelectMovePos;
+                    break;
+                    
+                // エネミー移動先選択
+                case _gDefSsrpgBattleField.GameState.iEnemySelectMovePos:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemyUnitMoveMotion;
+                    break;
+                    
+                // エネミー移動モーション
+                case _gDefSsrpgBattleField.GameState.iEnemyUnitMoveMotion:
+                    var _aryChara = this._info._chara;
+                    var _chara = _aryChara[ this._iSelectedUnit ];
+                    
+                    _chara._pos.x = this._iSelectedPos.x;
+                    _chara._pos.y = this._iSelectedPos.y;
+                    var _posTmp = _common.GetScrPos( _chara._pos.x, _chara._pos.y );
+                    _chara.x = _posTmp.x;
+                    _chara.y = _posTmp.y;
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemySelectAction;
+                    break;
+                    
+                // エネミー行動選択
+                case _gDefSsrpgBattleField.GameState.iEnemySelectAction:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemyCalcActionArea;
+                    break;
+                
+                // エネミー行動範囲計算
+                case _gDefSsrpgBattleField.GameState.iEnemyCalcActionArea:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemySelectActionPos;
+                    break;
+                    
+                // エネミー行動位置選択
+                case _gDefSsrpgBattleField.GameState.iEnemySelectActionPos:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemyActionExecute;
+                    break;
+                    
+                // エネミー行動実行
+                case _gDefSsrpgBattleField.GameState.iEnemyActionExecute:
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iEnemyCheckAfterAction;
+                    break;
+                    
+                // エネミー行動後チェック
+                case _gDefSsrpgBattleField.GameState.iEnemyCheckAfterAction:
+                    // 行動後のユニット消滅処理
+                    this.CheckAfterAction();
                     this._iGameState = _gDefSsrpgBattleField.GameState.iEnemyTurnEnd;
                     break;
                     
@@ -693,12 +774,15 @@ var CSsrpgBattleField = function() {
                 // エネミーステートの終了
                 case _gDefSsrpgBattleField.GameState.iEndEnemyState:
                     alert( "EndEnemyState" );
-                    this._iGameState = _gDefSsrpgBattleField.GameState.iStartPlayerState;
+                    this._iSelectedUnit = null;
+                    this._iSelectedPos = null;
+                    this._iGameState = _gDefSsrpgBattleField.GameState.iBattleEndCheckState;
                     break;
                     
                 // バトル終了チェックステート
                 case _gDefSsrpgBattleField.GameState.iBattleEndCheckState:
                     alert( "CheckBattleEnd" );
+                    // 味方全滅で負け
                     this._iGameState = _gDefSsrpgBattleField.GameState.iStartPlayerState;
                     break;
                     
@@ -718,6 +802,38 @@ var CSsrpgBattleField = function() {
                     break;
             }
         } );
+        
+        // CheckAfterAction
+        // 行動後のユニット消滅チェック
+        this._lblManager.CheckAfterAction = function ()
+        {
+            var _result = {
+                a: false,
+                b: false
+            };
+            
+            // すべてのユニットを監視
+            var _aryChara = this._info._chara;
+            var hogeKeys = Object.keys( _aryChara );
+            for (var i = 0, len = hogeKeys.length; i < len; i++) 
+            {
+                // HPが０以下になった時消滅
+                var _chara = _aryChara[ hogeKeys[ i ] ];
+                if ( _chara._param.iHp[ 0 ] <= 0 )
+                {
+                    // シーンから削除する
+                    this._parent._scene.removeChild( _aryChara[ hogeKeys[i] ] );            
+                }
+                else
+                {
+                    // ユニットの存在するチームはtrueを返すようにする
+                    if ( _chara._team === 0 )   _result.a = true;
+                    else                        _result.b = true;
+                }
+            }
+            
+            return _result;
+        };
         
         // 後ろ枠の作成
         _statesWindow.CreateBackSpace();
