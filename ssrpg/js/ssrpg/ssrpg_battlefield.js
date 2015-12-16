@@ -675,14 +675,16 @@ var CSsrpgBattleField = function() {
                 // 行動後チェック
                 case _gDefSsrpgBattleField.GameState.iCheckAfterAction:
                     // 行動後のユニット消滅処理
-                    this.CheckAfterAction();
+                    // 敵全滅で味方側の勝ち
+                    var result = this.CheckAfterAction();
+                    if ( result.a === false )       alert( "BattleEnd" );
+                    else if ( result.b === false )  alert( "BattleEnd" );
                     this._iGameState = _gDefSsrpgBattleField.GameState.iEndPlayerState;
                     break;
                     
                 // プレイヤーステートの終了
                 case _gDefSsrpgBattleField.GameState.iEndPlayerState:
                     alert( "EndPlayerState" );
-                    // 敵全滅で勝ち
                     this._iGameState = _gDefSsrpgBattleField.GameState.iStartEnemyState;
                     break;
                 
@@ -710,6 +712,7 @@ var CSsrpgBattleField = function() {
                             _aryChara[ hogeKeys[ i ] ]._param.iHp[ 0 ] > 0
                             )
                         {
+                            // 異動先の仮決め
                             this._iSelectedUnit = i;
                             this._iSelectedPos = {
                                 x: _aryChara[ hogeKeys[ i ] ]._pos.x + 1,
@@ -762,7 +765,10 @@ var CSsrpgBattleField = function() {
                 // エネミー行動後チェック
                 case _gDefSsrpgBattleField.GameState.iEnemyCheckAfterAction:
                     // 行動後のユニット消滅処理
-                    this.CheckAfterAction();
+                    // 味方全滅で負け
+                    var result = this.CheckAfterAction();
+                    if ( result.a === false )       alert( "BattleEnd" );
+                    else if ( result.b === false )  alert( "BattleEnd" );
                     this._iGameState = _gDefSsrpgBattleField.GameState.iEnemyTurnEnd;
                     break;
                     
@@ -782,7 +788,6 @@ var CSsrpgBattleField = function() {
                 // バトル終了チェックステート
                 case _gDefSsrpgBattleField.GameState.iBattleEndCheckState:
                     alert( "CheckBattleEnd" );
-                    // 味方全滅で負け
                     this._iGameState = _gDefSsrpgBattleField.GameState.iStartPlayerState;
                     break;
                     
